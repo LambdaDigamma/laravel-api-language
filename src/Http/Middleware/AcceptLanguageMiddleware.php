@@ -13,9 +13,10 @@ class AcceptLanguageMiddleware
     public function handle(Request $request, Closure $next)
     {
         app()->setLocale($this->getAcceptedLocale($request));
+
         return $next($request);
     }
-    
+
     private function getAcceptedLocale(Request $request): string
     {
         $available = Cache::rememberForever(config('language.cache.name', 'resources.lang'), function () {
@@ -36,17 +37,16 @@ class AcceptLanguageMiddleware
 
         $user = $request->user();
 
-        if ($user && !empty($user->locale)) {
+        if ($user && ! empty($user->locale)) {
             array_unshift($preferences, $user->locale);
         }
 
         reset($preferences);
 
         foreach ($preferences as $preference) {
-
             $preference = Locale::lookup($available, $preference);
 
-            if (!empty($preference)) {
+            if (! empty($preference)) {
                 return $preference;
             }
         }
@@ -54,7 +54,7 @@ class AcceptLanguageMiddleware
         return config('app.locale', 'en');
     }
 
-    private function getSupportedLanguages() 
+    private function getSupportedLanguages()
     {
         $useAutoscan = config('api-language.use_autoscan_lang_folder') ?? false;
 
@@ -67,7 +67,7 @@ class AcceptLanguageMiddleware
 
     /**
      * Scan languages folder and return list of available languages.
-     * 
+     *
      * @return array
      */
     private function scanLanguages(): array

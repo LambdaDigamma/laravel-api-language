@@ -21,7 +21,6 @@ beforeEach(function () {
 });
 
 it('can parse locale tag', function () {
-    
     expect(App::getLocale())->toBe('en');
     $request = Request::create('/', 'GET', [], [], [], [
         'HTTP_ACCEPT_LANGUAGE' => 'de',

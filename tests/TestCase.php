@@ -3,8 +3,8 @@
 namespace Lambdadigamma\LaravelApiLanguage\Tests;
 
 use Illuminate\Support\Facades\Config;
-use Orchestra\Testbench\TestCase as Orchestra;
 use Lambdadigamma\LaravelApiLanguage\LaravelApiLanguageServiceProvider;
+use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {

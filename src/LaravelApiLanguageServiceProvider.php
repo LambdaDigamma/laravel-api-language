@@ -4,7 +4,6 @@ namespace Lambdadigamma\LaravelApiLanguage;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Lambdadigamma\LaravelApiLanguage\Commands\LaravelApiLanguageCommand;
 
 class LaravelApiLanguageServiceProvider extends PackageServiceProvider
 {
