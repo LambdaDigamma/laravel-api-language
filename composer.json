@@ -4,7 +4,10 @@
     "keywords": [
         "LambdaDigamma",
         "laravel",
-        "laravel-api-language"
+        "laravel-api-language",
+        "accept language",
+        "content language",
+        "middleware"
     ],
     "homepage": "https://github.com/lambdadigamma/laravel-api-language",
     "license": "MIT",
