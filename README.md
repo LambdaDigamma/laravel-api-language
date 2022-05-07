@@ -18,7 +18,7 @@ composer require lambdadigamma/laravel-api-language
 You can publish the config file with:
 
 ```bash
-php artisan vendor:publish --provider="Lambdadigamma\LaravelApiLanguage\LaravelApiLanguageServiceProvider" --tag="laravel-api-language-config"
+php artisan vendor:publish --provider="Lambdadigamma\LaravelApiLanguage\LaravelApiLanguageServiceProvider" --tag="api-language-config"
 ```
 
 This is the contents of the published config file:
