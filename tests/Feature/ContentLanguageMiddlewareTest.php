@@ -5,7 +5,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 use Lambdadigamma\LaravelApiLanguage\Http\Middleware\ContentLanguageMiddleware;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * @var Response
@@ -36,7 +35,6 @@ test('content language header', function () {
 });
 
 test('content language does not get set on binary response', function () {
-
     App::setLocale('de');
     Storage::fake();
     Storage::put('abc.txt', 'ABC');
