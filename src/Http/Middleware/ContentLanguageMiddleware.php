@@ -12,7 +12,10 @@ class ContentLanguageMiddleware
     {
         $response = $next($request);
         $contentLanguage = App::getLocale() ?? config('app.fallback_locale') ?? 'en';
-        $response->header('Content-Language', $contentLanguage);
+
+        if (method_exists($response, 'header')) {
+            $response->header('Content-Language', $contentLanguage);
+        }
 
         return $response;
     }
