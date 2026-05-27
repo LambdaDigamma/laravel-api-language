@@ -5,13 +5,18 @@ namespace Lambdadigamma\LaravelApiLanguage;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
+/**
+ * @psalm-api
+ */
 class LaravelApiLanguageServiceProvider extends PackageServiceProvider
 {
+    #[\Override]
     public function packageRegistered(): void
     {
         $this->app->singleton(LanguageNegotiator::class);
     }
 
+    #[\Override]
     public function configurePackage(Package $package): void
     {
         /*

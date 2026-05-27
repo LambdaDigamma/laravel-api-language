@@ -10,6 +10,9 @@ use Locale;
 use Symfony\Component\HttpFoundation\AcceptHeader;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @psalm-api
+ */
 class LanguageNegotiator
 {
     /**
@@ -18,7 +21,6 @@ class LanguageNegotiator
     public function negotiate(Request|string|null $source, ?array $supportedLocales = null): LanguageNegotiationResult
     {
         $acceptedLocales = [];
-        $excludedLocales = [];
         $acceptLanguage = $this->acceptLanguageHeader($source);
 
         if ($source instanceof Request && $this->shouldPreferUserLocale()) {
@@ -110,6 +112,8 @@ class LanguageNegotiator
 
     /**
      * @param  array<int, string>  $excludedLocales
+     *
+     * @psalm-api
      */
     public function isAcceptedLocaleExcluded(string $locale, array $excludedLocales): bool
     {

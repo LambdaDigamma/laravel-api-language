@@ -11,10 +11,13 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool isAcceptedLocaleExcluded(string $locale, array $excludedLocales)
  * @method static \Symfony\Component\HttpFoundation\Response addVaryHeader(\Symfony\Component\HttpFoundation\Response $response, string|array $headers = 'Accept-Language')
  *
+ * @psalm-api
+ *
  * @see \Lambdadigamma\LaravelApiLanguage\LanguageNegotiator
  */
 class LaravelApiLanguageFacade extends Facade
 {
+    #[\Override]
     protected static function getFacadeAccessor(): string
     {
         return LanguageNegotiator::class;

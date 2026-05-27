@@ -2,6 +2,9 @@
 
 namespace Lambdadigamma\LaravelApiLanguage\Data;
 
+/**
+ * @psalm-api
+ */
 readonly class LanguageNegotiationResult
 {
     /**

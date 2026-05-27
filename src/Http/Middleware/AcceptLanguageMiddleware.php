@@ -8,6 +8,9 @@ use Lambdadigamma\LaravelApiLanguage\Data\LanguageNegotiationResult;
 use Lambdadigamma\LaravelApiLanguage\LanguageNegotiator;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @psalm-api
+ */
 class AcceptLanguageMiddleware
 {
     public function __construct(
@@ -25,7 +28,7 @@ class AcceptLanguageMiddleware
         $response = $next($request);
 
         if ((bool) config('api-language.automatic_vary_header', true) && $response instanceof Response) {
-            $this->languageNegotiator()->addVaryHeader($response);
+            $response = $this->languageNegotiator()->addVaryHeader($response);
         }
 
         return $response;
