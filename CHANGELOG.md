@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-api-language` will be documented in this file.
 
+## Unreleased
+
+- Fix the Psalm GitHub Actions workflow to use the supported Composer cache action.
+
 ## 1.2.0 - 2026-05-27
 
 - Add `LanguageNegotiator` and `LanguageNegotiationResult` for reusable Accept-Language parsing.
