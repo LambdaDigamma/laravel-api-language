@@ -4,74 +4,55 @@ namespace Lambdadigamma\LaravelApiLanguage\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
-use Locale;
+use Lambdadigamma\LaravelApiLanguage\Data\LanguageNegotiationResult;
+use Lambdadigamma\LaravelApiLanguage\LanguageNegotiator;
+use Symfony\Component\HttpFoundation\Response;
 
 class AcceptLanguageMiddleware
 {
+    public function __construct(
+        private ?LanguageNegotiator $languageNegotiator = null,
+    ) {
+    }
+
     public function handle(Request $request, Closure $next)
     {
-        app()->setLocale($this->getAcceptedLocale($request));
+        $result = $this->languageNegotiator()->negotiate($request);
 
-        return $next($request);
-    }
+        app()->setLocale($result->resolvedLocale);
+        $this->storeNegotiationResult($request, $result);
 
-    private function getAcceptedLocale(Request $request): string
-    {
-        $available = Cache::rememberForever(config('language.cache.name', 'resources.lang'), function () {
-            return $this->getSupportedLanguages();
-        });
+        $response = $next($request);
 
-        $preferences = collect($request->getLanguages())->map(function ($locale) {
-            return Str::replace('_', '-', $locale);
-        });
-
-        $preferences->each(function ($preference) use ($available) {
-            if (in_array($preference, $available)) {
-                return $preference;
-            }
-        });
-
-        $preferences = $preferences->toArray();
-
-        $user = $request->user();
-
-        if ($user && ! empty($user->locale)) {
-            array_unshift($preferences, $user->locale);
+        if ((bool) config('api-language.automatic_vary_header', true) && $response instanceof Response) {
+            $this->languageNegotiator()->addVaryHeader($response);
         }
 
-        reset($preferences);
-
-        foreach ($preferences as $preference) {
-            $preference = Locale::lookup($available, $preference);
-
-            if (! empty($preference)) {
-                return $preference;
-            }
-        }
-
-        return config('app.locale', 'en');
+        return $response;
     }
 
-    private function getSupportedLanguages()
+    private function languageNegotiator(): LanguageNegotiator
     {
-        $useAutoscan = config('api-language.use_autoscan_lang_folder') ?? false;
-
-        if ($useAutoscan) {
-            return $this->scanLanguages();
-        } else {
-            return config('api-language.supported_locales') ?? ['en'];
-        }
+        return $this->languageNegotiator ??= app(LanguageNegotiator::class);
     }
 
-    /**
-     * Scan languages folder and return list of available languages.
-     *
-     * @return array
-     */
-    private function scanLanguages(): array
+    private function storeNegotiationResult(Request $request, LanguageNegotiationResult $result): void
     {
-        return array_diff(scandir(resource_path('lang')), ['..', '.']) ?: [];
+        $request->attributes->set(
+            (string) config('api-language.request_attributes.accepted_locales', 'api_language.accepted_locales'),
+            $result->acceptedLocales,
+        );
+        $request->attributes->set(
+            (string) config('api-language.request_attributes.excluded_locales', 'api_language.excluded_locales'),
+            $result->excludedLocales,
+        );
+        $request->attributes->set(
+            (string) config('api-language.request_attributes.resolved_locale', 'api_language.resolved_locale'),
+            $result->resolvedLocale,
+        );
+        $request->attributes->set(
+            (string) config('api-language.request_attributes.result', 'api_language.result'),
+            $result,
+        );
     }
 }

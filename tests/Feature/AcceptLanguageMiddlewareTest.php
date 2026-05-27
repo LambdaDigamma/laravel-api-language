@@ -85,3 +85,33 @@ it('can parse multiple qualified locale tags', function () {
     expect(App::getLocale())->toBe('es');
     // expect(App::getLocale())->toBe('es-US');
 });
+
+it('stores the language negotiation result on the request', function () {
+    $request = Request::create('/', 'GET', [], [], [], [
+        'HTTP_ACCEPT_LANGUAGE' => 'de;q=0, en;q=0.8',
+    ]);
+
+    $handled = $this->middleware->handle($request, function () {
+        return $this->response;
+    });
+
+    expect(App::getLocale())->toBe('en');
+    expect($request->attributes->get('api_language.accepted_locales'))->toBe(['en']);
+    expect($request->attributes->get('api_language.excluded_locales'))->toBe(['de']);
+    expect($request->attributes->get('api_language.resolved_locale'))->toBe('en');
+    expect($handled->headers->get('Vary'))->toBe('Accept-Language');
+});
+
+it('merges the accept language vary header without duplicates', function () {
+    $this->response->headers->set('Vary', 'Accept-Encoding, Accept-Language');
+
+    $request = Request::create('/', 'GET', [], [], [], [
+        'HTTP_ACCEPT_LANGUAGE' => 'de',
+    ]);
+
+    $handled = $this->middleware->handle($request, function () {
+        return $this->response;
+    });
+
+    expect($handled->headers->get('Vary'))->toBe('Accept-Encoding, Accept-Language');
+});

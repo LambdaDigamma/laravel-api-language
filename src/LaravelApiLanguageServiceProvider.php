@@ -7,6 +7,11 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class LaravelApiLanguageServiceProvider extends PackageServiceProvider
 {
+    public function packageRegistered(): void
+    {
+        $this->app->singleton(LanguageNegotiator::class);
+    }
+
     public function configurePackage(Package $package): void
     {
         /*

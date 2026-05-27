@@ -28,16 +28,48 @@ return [
 
     'supported_locales' => ['en'],
 
-    'use_autoscan_lang_folder' => false
+    'fallback_locale' => null,
+
+    'use_autoscan_lang_folder' => false,
+
+    'cache' => [
+        'supported_locales_key' => 'api-language.supported-locales',
+    ],
+
+    'request_attributes' => [
+        'accepted_locales' => 'api_language.accepted_locales',
+        'excluded_locales' => 'api_language.excluded_locales',
+        'resolved_locale' => 'api_language.resolved_locale',
+        'result' => 'api_language.result',
+    ],
+
+    'prefer_user_locale' => true,
+
+    'user_locale_attribute' => 'locale',
+
+    'automatic_vary_header' => true,
 
 ];
 ```
 
 ## Usage
 
-To use the accept language middleware, just register it in your application's HTTP kernel.
+To use the accept language middleware, register it with your application's middleware.
 
-Register it as a global middleware:
+In Laravel 11 and newer, append it to the API middleware group in `bootstrap/app.php`:
+
+```php
+use Illuminate\Foundation\Configuration\Middleware;
+use Lambdadigamma\LaravelApiLanguage\Http\Middleware\AcceptLanguageMiddleware;
+
+->withMiddleware(function (Middleware $middleware) {
+    $middleware->api(append: [
+        AcceptLanguageMiddleware::class,
+    ]);
+})
+```
+
+In older Laravel applications, register it as a global middleware:
 
 ```php
 protected $middleware = [
@@ -56,6 +88,42 @@ protected $middlewareGroups = [
     ]
 ];
 ```
+
+The middleware stores the full negotiation result on the request. This is useful
+for APIs that need to pick resource-specific translations instead of only setting
+Laravel's application locale:
+
+```php
+$acceptedLocales = $request->attributes->get('api_language.accepted_locales', []);
+$excludedLocales = $request->attributes->get('api_language.excluded_locales', []);
+$resolvedLocale = $request->attributes->get('api_language.resolved_locale');
+```
+
+You can also use the negotiator directly:
+
+```php
+use Lambdadigamma\LaravelApiLanguage\LanguageNegotiator;
+
+$result = app(LanguageNegotiator::class)->negotiate($request);
+
+$result->acceptedLocales; // ordered positive locales, including positive * and excluding q=0
+$result->excludedLocales; // q=0 locales, including *
+$result->resolvedLocale;  // best supported application locale
+$result->resolvedLocaleIsAcceptable; // false when every supported locale is excluded
+```
+
+Use `isAcceptedLocaleExcluded()` when checking an explicit positive locale from
+`acceptedLocales`; it honors concrete `q=0` ranges without letting `*;q=0`
+reject explicitly accepted languages.
+
+`AcceptLanguageMiddleware` adds `Vary: Accept-Language` by default. Disable this
+with `automatic_vary_header` if another layer owns response cache variation.
+When `prefer_user_locale` is enabled for authenticated APIs, make sure those
+responses are private/auth-aware in your cache layer because the resolved locale
+can also depend on the current user.
+
+`ContentLanguageMiddleware` is available for single-locale responses. It will not
+overwrite an existing `Content-Language` header.
 
 ## Testing
 

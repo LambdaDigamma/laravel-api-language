@@ -34,7 +34,7 @@ test('content language header', function () {
     expect(App::getLocale())->toBe('de');
 });
 
-test('content language does not get set on binary response', function () {
+test('content language gets set on binary responses when missing', function () {
     App::setLocale('de');
     Storage::fake();
     Storage::put('abc.txt', 'ABC');
@@ -46,5 +46,19 @@ test('content language does not get set on binary response', function () {
     });
 
     expect(App::getLocale())->toBe('de');
-    expect($handled->headers)->not->toBeNull();
+    expect($handled->headers->get('content-language'))->toBe('de');
+});
+
+test('content language does not overwrite an existing header', function () {
+    App::setLocale('de');
+    $this->response->headers->set('Content-Language', 'fr');
+
+    $request = Request::create('/', 'GET', [], [], [], []);
+    $middleware = new ContentLanguageMiddleware();
+    $handled = $middleware->handle($request, function () {
+        return $this->response;
+    });
+
+    expect($handled->headers->get('content-language'))->toBe('fr');
+    expect(App::getLocale())->toBe('de');
 });
